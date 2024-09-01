@@ -19,17 +19,14 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         // Fetching data from the backend API
-        const [transactionsRes, revenueRes, profitRes] = await Promise.all([
-          axios.get('/api/transactions'),
-          axios.get('/api/revenue'),
-          axios.get('/api/profit')
-        ]);
+        const response = await axios.get('/api/dashboard-stats');
+        const { transaksi, pendapatan, laba } = response.data;
 
         // Update state with the fetched data
         setData({
-          transactions: transactionsRes.data.count,
-          revenue: `Rp. ${revenueRes.data.amount}`,
-          profit: `Rp. ${profitRes.data.amount}`
+          transactions: transaksi,
+          revenue: `Rp. ${pendapatan.toLocaleString()}`,
+          profit: `Rp. ${laba.toLocaleString()}`
         });
       } catch (error) {
         console.error("Error fetching data", error);

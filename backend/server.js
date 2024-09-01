@@ -2,7 +2,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./db');
 const oracledb = require('oracledb');
 
 const app = express();
@@ -16,7 +15,12 @@ app.get('/api/dashboard-stats', async (req, res) => {
     let connection;
 
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'admin_toko',
+            password: 'admin_toko',
+            connectString: 'localhost:1521/xe'
+        });
+
         const result = await connection.execute(`
             SELECT 
                 (SELECT COUNT(*) FROM transaksi) AS transaksi,
@@ -46,16 +50,10 @@ app.get('/api/dashboard-stats', async (req, res) => {
     }
 });
 
-db.initialize()
-    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
-    .catch(err => {
-        console.error('Failed to start server', err);
-        process.exit(1);
-    });
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
 process.on('SIGINT', () => {
-    db.close().then(() => process.exit(0)).catch(err => {
-        console.error('Failed to close database connection', err);
-        process.exit(1);
-    });
+    process.exit(0);
 });
