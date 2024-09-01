@@ -11,8 +11,8 @@ import axios from 'axios';
 function Dashboard() {
   const [data, setData] = useState({
     transactions: 0,
-    revenue: 'Rp. 0',
-    profit: 'Rp. 0',
+    revenue: '0',
+    profit: '0',
     productCount: 0,
     userCount: 0,
   });
@@ -20,23 +20,46 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/dashboard-stats');
-        const { transaksi, pendapatan, laba, jumlah_produk, jumlah_pengguna } = response.data;
+        const response = await axios.get('http://localhost:5000/api/dashboard');
+        console.log('API Response:', response.data);
+
+        // Updated destructuring to match API response keys
+        const { TRANSAKSI, PENDAPATAN, LABA, JUMLAH_PRODUK, JUMLAH_PENGGUNA } = response.data;
+        console.log('Extracted Data:', { TRANSAKSI, PENDAPATAN, LABA, JUMLAH_PRODUK, JUMLAH_PENGGUNA });
 
         setData({
-          transactions: transaksi,
-          revenue: `Rp. ${pendapatan.toLocaleString()}`,
-          profit: `Rp. ${laba.toLocaleString()}`,
-          productCount: jumlah_produk,
-          userCount: jumlah_pengguna
+          transactions: TRANSAKSI || 0, // Ensure transactions is a number
+          revenue: formatCurrency(PENDAPATAN), // Format revenue
+          profit: formatCurrency(LABA), // Format profit
+          productCount: JUMLAH_PRODUK || 0, // Ensure product count is a number
+          userCount: JUMLAH_PENGGUNA || 0  // Ensure user count is a number
         });
-      } catch (error) {
-        console.error("Error fetching data", error);
+      }
+      catch (error) {
+        console.error("Error fetching data from http://localhost:5000/api/dashboard:", error.response ? error.response.data : error.message);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('Request data:', error.request);
+        } else {
+          console.error('Error message:', error.message);
+        }
+        console.error('Error config:', error.config);
       }
     };
 
     fetchData();
   }, []);
+
+  // Helper function to format currency
+  function formatCurrency(value) {
+    if (typeof value === 'number' && !isNaN(value)) {
+      return `Rp. ${value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
+    }
+    return 'Rp. 0'; // Default value if not a valid number
+  }
 
   return (
     <DashboardLayout>
