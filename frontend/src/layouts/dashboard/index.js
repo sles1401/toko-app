@@ -12,21 +12,23 @@ function Dashboard() {
   const [data, setData] = useState({
     transactions: 0,
     revenue: 'Rp. 0',
-    profit: 'Rp. 0'
+    profit: 'Rp. 0',
+    productCount: 0,
+    userCount: 0,
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetching data from the backend API
         const response = await axios.get('/api/dashboard-stats');
-        const { transaksi, pendapatan, laba } = response.data;
+        const { transaksi, pendapatan, laba, jumlah_produk, jumlah_pengguna } = response.data;
 
-        // Update state with the fetched data
         setData({
           transactions: transaksi,
           revenue: `Rp. ${pendapatan.toLocaleString()}`,
-          profit: `Rp. ${laba.toLocaleString()}`
+          profit: `Rp. ${laba.toLocaleString()}`,
+          productCount: jumlah_produk,
+          userCount: jumlah_pengguna
         });
       } catch (error) {
         console.error("Error fetching data", error);
@@ -82,6 +84,36 @@ function Dashboard() {
                   color: "success",
                   amount: "",
                   label: "Hari Ini"
+                }}
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="inventory_2"
+                title="Jumlah Produk"
+                count={data.productCount}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: "Total Produk"
+                }}
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="people"
+                title="Jumlah Pengguna"
+                count={data.userCount}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: "Total Pengguna"
                 }}
               />
             </MDBox>
