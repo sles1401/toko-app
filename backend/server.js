@@ -21,7 +21,10 @@ db.initialize().catch(err => {
 
 // Routes
 const dashboardRoutes = require('./routes/dashboard');
+const userRoutes = require('./routes/users');
+
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

@@ -37,9 +37,9 @@ Coded by www.creative-tim.com
 
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
-import Product from "layouts/tables";
+import User from "layouts/tables";
 import Transaction from "layouts/billing";
-import User from "layouts/rtl";
+import Produt from "layouts/rtl";
 import Report from "layouts/notifications";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -57,22 +57,22 @@ const routes = [
     route: "/dashboard",
     component: <Dashboard />,
   },
-  {
-    type: "collapse",
-    name: "Transaction",
-    key: "transaction",
-    icon: <Icon fontSize="small">receipt</Icon>,
-    route: "/transaction",
-    component: <Transaction />,
-  },
-  {
-    type: "collapse",
-    name: "Product",
-    key: "product",
-    icon: <Icon fontSize="small">inventory_2</Icon>,
-    route: "/product",
-    component: <Product />,
-  },
+  // {
+  //   type: "collapse",
+  //   name: "Transaction",
+  //   key: "transaction",
+  //   icon: <Icon fontSize="small">receipt</Icon>,
+  //   route: "/transaction",
+  //   component: <Transaction />,
+  // },
+  // {
+  //   type: "collapse",
+  //   name: "Product",
+  //   key: "product",
+  //   icon: <Icon fontSize="small">inventory_2</Icon>,
+  //   route: "/product",
+  //   component: <Product />,
+  // },
   {
     type: "collapse",
     name: "User",
@@ -81,14 +81,14 @@ const routes = [
     route: "/user",
     component: <User />,
   },
-  {
-    type: "collapse",
-    name: "Report",
-    key: "report",
-    icon: <Icon fontSize="small">report</Icon>,
-    route: "/report",
-    component: <Report />,
-  },
+  // {
+  //   type: "collapse",
+  //   name: "Report",
+  //   key: "report",
+  //   icon: <Icon fontSize="small">report</Icon>,
+  //   route: "/report",
+  //   component: <Report />,
+  // },
 ];
 
 export default routes;

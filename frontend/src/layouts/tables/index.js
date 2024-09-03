@@ -1,18 +1,5 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
+/* eslint-disable prettier/prettier */
+import React, { useEffect, useState } from "react";
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -27,13 +14,47 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 
-// Data
-import authorsTableData from "layouts/tables/data/authorsTableData";
-import projectsTableData from "layouts/tables/data/projectsTableData";
-
 function Tables() {
-  const { columns, rows } = authorsTableData();
-  const { columns: pColumns, rows: pRows } = projectsTableData();
+  // State for storing data fetched from API
+  const [userRows, setUserRows] = useState([]);
+
+  // Fetch user data from API when component mounts
+  useEffect(() => {
+    fetch('http://localhost:5000/api/users')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json(); // Return JSON if response is OK
+      })
+      .then((data) => {
+        const formattedRows = data.map((user) => ({
+          author: {
+            name: user.Nama_Lengkap,
+            email: user.Username,
+          },
+          function: {
+            title: user.Nama_Peran,
+            description: user.Deskripsi_Peran,
+          },
+          status: user.Status_Aktif === "Aktif" ? "online" : "offline",
+          employed: new Date(user.Tanggal_Pendaftaran).toLocaleDateString(),
+        }));
+        setUserRows(formattedRows);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+
+  }, []);
+
+  // Column definitions
+  const columns = [
+    { Header: "User", accessor: "author", width: "45%", align: "left" },
+    { Header: "Function", accessor: "function", align: "left" },
+    { Header: "Status", accessor: "status", align: "center" },
+    { Header: "Employed", accessor: "employed", align: "center" },
+  ];
 
   return (
     <DashboardLayout>
@@ -53,39 +74,12 @@ function Tables() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Authors Table
+                  Users Table
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
                 <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
-              </MDBox>
-            </Card>
-          </Grid>
-          <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-              >
-                <MDTypography variant="h6" color="white">
-                  Projects Table
-                </MDTypography>
-              </MDBox>
-              <MDBox pt={3}>
-                <DataTable
-                  table={{ columns: pColumns, rows: pRows }}
+                  table={{ columns, rows: userRows }}
                   isSorted={false}
                   entriesPerPage={false}
                   showTotalEntries={false}
