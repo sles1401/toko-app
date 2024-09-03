@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Initialize database pool
 db.initialize().catch(err => {
-    console.error("Failed to initialize database pool:", err);
+    console.error('Failed to initialize database pool:', err);
     process.exit(1);
 });
 
@@ -24,7 +24,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/users');
 
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); // This prefixes all routes in userRoutes with /api/users
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

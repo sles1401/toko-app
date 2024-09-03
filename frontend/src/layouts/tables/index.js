@@ -1,57 +1,41 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
-// @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-
-// Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
+import axios from 'axios'; // Import axios
 
 function Tables() {
-  // State for storing data fetched from API
   const [userRows, setUserRows] = useState([]);
 
-  // Fetch user data from API when component mounts
   useEffect(() => {
-    fetch('http://localhost:5000/api/users')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json(); // Return JSON if response is OK
-      })
-      .then((data) => {
-        const formattedRows = data.map((user) => ({
-          author: {
-            name: user.Nama_Lengkap,
-            email: user.Username,
-          },
-          function: {
-            title: user.Nama_Peran,
-            description: user.Deskripsi_Peran,
-          },
-          status: user.Status_Aktif === "Aktif" ? "online" : "offline",
-          employed: new Date(user.Tanggal_Pendaftaran).toLocaleDateString(),
-        }));
-        setUserRows(formattedRows);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/getUsers');
+        const data = response.data;
 
+        const formattedRows = data.map((user) => ({
+          author: user.NAMA_LENGKAP, // Ensure this is a string
+          status: user.STATUS_AKTIF === "Aktif" ? "online" : "offline",
+          employed: new Date(user.TANGGAL_PENDAFTARAN).toLocaleDateString(),
+        }));
+
+        setUserRows(formattedRows);
+      } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  // Column definitions
   const columns = [
     { Header: "User", accessor: "author", width: "45%", align: "left" },
-    { Header: "Function", accessor: "function", align: "left" },
     { Header: "Status", accessor: "status", align: "center" },
     { Header: "Employed", accessor: "employed", align: "center" },
   ];
