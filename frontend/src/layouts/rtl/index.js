@@ -93,25 +93,26 @@ function ProductTable() {
                 </MDTypography>
               </MDBox>
               <MDBox pt={3} px={2}>
-                {/* Search Bar */}
-                <TextField
-                  fullWidth
-                  label="Search"
-                  variant="outlined"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                {/* Container for Search Bar and Print Button */}
+                <div className="search-and-print-container" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <TextField
+                    label="Search"
+                    variant="outlined"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ flex: 1, marginRight: '1rem' }} // Adjust margin for spacing
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handlePrint}
+                    style={{ color: 'white' }} // Set text color to white
+                  >
+                    Print
+                  </Button>
+                </div>
               </MDBox>
-              <MDBox pt={3} px={2} display="flex" justifyContent="space-between" alignItems="center">
-                {/* Print Button */}
-                <Button
-                  variant="contained"
-                  color="white"
-                  onClick={handlePrint}
-                >
-                  Print
-                </Button>
-              </MDBox>
+
               <MDBox pt={3} id="printableTable">
                 <DataTable
                   table={{ columns, rows: filteredRows }}
