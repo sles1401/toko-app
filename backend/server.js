@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const oracledb = require('oracledb'); // Import the OracleDB module
 const db = require('./config/db'); // Adjust path if needed
 require('dotenv').config();
 
