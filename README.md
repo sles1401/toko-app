@@ -46,7 +46,7 @@ Toko App is a React-based admin dashboard application designed to manage transac
 
 ## Configuration
 
-- **Backend Database:** Configure the backend to connect to the Oracle database as specified in your thesis project.
+- **Backend Database:** Configure the backend to connect to the Oracle database.
 - **Environment Variables:** Set up any required environment variables for backend connectivity.
 
 ## Usage
