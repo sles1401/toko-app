@@ -1,8 +1,7 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./config/db');
+const db = require('./config/db'); // Adjust path if needed
 require('dotenv').config();
 
 const app = express();
@@ -22,9 +21,11 @@ db.initialize().catch(err => {
 // Routes
 const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/users');
+const productRoutes = require('./routes/products');
 
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/users', userRoutes); // This prefixes all routes in userRoutes with /api/users
+app.use('/api/users', userRoutes); // Prefix for user routes
+app.use('/api/products', productRoutes); // Prefix for product routes
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

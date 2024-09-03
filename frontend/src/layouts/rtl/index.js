@@ -1,176 +1,133 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import { useEffect } from "react";
-
-// @mui material components
+/* eslint-disable prettier/prettier */
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
-
-// Material Dashboard 2 React components
+import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
-
-// Material Dashboard 2 React example components
+import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
-import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
-import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import DataTable from "examples/Tables/DataTable";
+import axios from 'axios'; // Import axios
+import TextField from '@mui/material/TextField'; // Import TextField for search bar
+import Button from '@mui/material/Button'; // Import Button for print functionality
 
-// Data
-import reportsBarChartData from "layouts/rtl/data/reportsBarChartData";
-import reportsLineChartData from "layouts/rtl/data/reportsLineChartData";
+function ProductTable() {
+  const [productRows, setProductRows] = useState([]);
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-// RTL components
-import Projects from "layouts/rtl/components/Projects";
-import OrdersOverview from "layouts/rtl/components/OrdersOverview";
-
-// Material Dashboard 2 React contexts
-import { useMaterialUIController, setDirection } from "context";
-
-function RTL() {
-  const [, dispatch] = useMaterialUIController();
-  const { sales, tasks } = reportsLineChartData;
-
-  // Changing the direction to rtl
   useEffect(() => {
-    setDirection(dispatch, "rtl");
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/products/getProducts');
+        const data = response.data;
 
-    return () => setDirection(dispatch, "ltr");
+        const formattedRows = data.map((product) => ({
+          productName: product.NAMA_PRODUK, // Ensure this matches your data structure
+          category: product.NAMA_KATEGORI, // Ensure this matches your data structure
+          unit: product.NAMA_SATUAN, // Ensure this matches your data structure
+          stock: product.JUMLAH_STOK, // Ensure this matches your data structure
+          price: product.HARGA_JUAL, // Ensure this matches your data structure
+        }));
+
+        setProductRows(formattedRows);
+        setFilteredRows(formattedRows);
+      } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  // Filter rows based on search term
+  useEffect(() => {
+    const results = productRows.filter(row =>
+      row.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredRows(results);
+  }, [searchTerm, productRows]);
+
+  const columns = [
+    { Header: "Product Name", accessor: "productName", width: "25%", align: "left" },
+    { Header: "Category", accessor: "category", align: "left" },
+    { Header: "Unit", accessor: "unit", align: "left" },
+    { Header: "Stock", accessor: "stock", align: "center" },
+    { Header: "Price", accessor: "price", align: "right" },
+  ];
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    const printContent = document.getElementById('printableTable').innerHTML;
+    printWindow.document.write('<html><head><title>Print</title>');
+    printWindow.document.write('<style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style>');
+    printWindow.document.write('</head><body >');
+    printWindow.document.write(printContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox py={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="dark"
-                icon="weekend"
-                title="أموال اليوم"
-                count={281}
-                percentage={{
-                  color: "success",
-                  amount: "+55%",
-                  label: "من الأسبوع الماضي",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                icon="leaderboard"
-                title="مستخدمو اليوم"
-                count="2,300"
-                percentage={{
-                  color: "success",
-                  amount: "+3%",
-                  label: "من الأسبوع الماضي",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="success"
-                icon="store"
-                title="عملاء جدد"
-                count="34k"
-                percentage={{
-                  color: "success",
-                  amount: "+1%",
-                  label: "من الشهر الماضي",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="primary"
-                icon="person_add"
-                title="مبيعات"
-                count="+91"
-                percentage={{
-                  color: "success",
-                  amount: "",
-                  label: "مقارنة بيوم أمس",
-                }}
-              />
-            </MDBox>
+      <MDBox pt={6} pb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Products Table
+                </MDTypography>
+              </MDBox>
+              <MDBox pt={3} px={2}>
+                {/* Search Bar */}
+                <TextField
+                  fullWidth
+                  label="Search"
+                  variant="outlined"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </MDBox>
+              <MDBox pt={3} px={2} display="flex" justifyContent="space-between" alignItems="center">
+                {/* Print Button */}
+                <Button
+                  variant="contained"
+                  color="white"
+                  onClick={handlePrint}
+                >
+                  Print
+                </Button>
+              </MDBox>
+              <MDBox pt={3} id="printableTable">
+                <DataTable
+                  table={{ columns, rows: filteredRows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
           </Grid>
         </Grid>
-        <MDBox mt={4.5}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6} lg={4}>
-              <MDBox mb={3}>
-                <ReportsBarChart
-                  color="info"
-                  title="مشاهدات الموقع"
-                  description="آخر أداء للحملة"
-                  date="الحملة أرسلت قبل يومين"
-                  chart={reportsBarChartData}
-                />
-              </MDBox>
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <MDBox mb={3}>
-                <ReportsLineChart
-                  color="success"
-                  title="المبيعات اليومية"
-                  description={
-                    <>
-                      (<strong>+15%</strong>) زيادة في مبيعات اليوم..
-                    </>
-                  }
-                  date="تم التحديث منذ 4 دقائق"
-                  chart={sales}
-                />
-              </MDBox>
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <MDBox mb={3}>
-                <ReportsLineChart
-                  color="dark"
-                  title="المهام المكتملة"
-                  description="آخر أداء للحملة"
-                  date="تم تحديثه للتو"
-                  chart={tasks}
-                />
-              </MDBox>
-            </Grid>
-          </Grid>
-        </MDBox>
-        <MDBox>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6} lg={8}>
-              <Projects />
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <OrdersOverview />
-            </Grid>
-          </Grid>
-        </MDBox>
       </MDBox>
       <Footer />
     </DashboardLayout>
   );
 }
 
-export default RTL;
+export default ProductTable;

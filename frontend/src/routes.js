@@ -39,7 +39,7 @@ Coded by www.creative-tim.com
 import Dashboard from "layouts/dashboard";
 import User from "layouts/tables";
 import Transaction from "layouts/billing";
-import Produt from "layouts/rtl";
+import Product from "layouts/rtl";
 import Report from "layouts/notifications";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -65,14 +65,14 @@ const routes = [
   //   route: "/transaction",
   //   component: <Transaction />,
   // },
-  // {
-  //   type: "collapse",
-  //   name: "Product",
-  //   key: "product",
-  //   icon: <Icon fontSize="small">inventory_2</Icon>,
-  //   route: "/product",
-  //   component: <Product />,
-  // },
+  {
+    type: "collapse",
+    name: "Product",
+    key: "product",
+    icon: <Icon fontSize="small">inventory_2</Icon>,
+    route: "/product",
+    component: <Product />,
+  },
   {
     type: "collapse",
     name: "User",
