@@ -57,14 +57,14 @@ const routes = [
     route: "/dashboard",
     component: <Dashboard />,
   },
-  // {
-  //   type: "collapse",
-  //   name: "Transaction",
-  //   key: "transaction",
-  //   icon: <Icon fontSize="small">receipt</Icon>,
-  //   route: "/transaction",
-  //   component: <Transaction />,
-  // },
+  {
+    type: "collapse",
+    name: "Transaction",
+    key: "transaction",
+    icon: <Icon fontSize="small">receipt</Icon>,
+    route: "/transaction",
+    component: <Transaction />,
+  },
   {
     type: "collapse",
     name: "Product",
@@ -81,14 +81,22 @@ const routes = [
     route: "/user",
     component: <User />,
   },
-  // {
-  //   type: "collapse",
-  //   name: "Report",
-  //   key: "report",
-  //   icon: <Icon fontSize="small">report</Icon>,
-  //   route: "/report",
-  //   component: <Report />,
-  // },
+  {
+    type: "collapse",
+    name: "Report",
+    key: "report",
+    icon: <Icon fontSize="small">report</Icon>,
+    route: "/report",
+    component: <Report />,
+  },
+  {
+    type: "collapse",
+    name: "Profile",
+    key: "profile",
+    icon: <Icon fontSize="small">account_circle</Icon>,
+    route: "/profile",
+    component: <Profile />,
+  },
 ];
 
 export default routes;

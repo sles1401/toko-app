@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
@@ -17,6 +16,45 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Formik, Field, Form } from 'formik';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+
+// Define the ActionsCell component with prop types
+const ActionsCell = ({ cell, onEdit, onDelete }) => (
+  <div>
+    <Button
+      onClick={() => onEdit(cell.row.original)}
+      color="warning"
+      aria-label="Edit"
+    >
+      Edit
+    </Button>
+    <Button
+      onClick={() => onDelete(cell.row.original.id)}
+      color="error"
+      aria-label="Delete"
+    >
+      Delete
+    </Button>
+  </div>
+);
+
+ActionsCell.propTypes = {
+  cell: PropTypes.shape({
+    row: PropTypes.shape({
+      original: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        author: PropTypes.string.isRequired,
+        alamat: PropTypes.string.isRequired,
+        telepon: PropTypes.string.isRequired,
+        status: PropTypes.string.isRequired,
+        employed: PropTypes.string.isRequired,
+      }).isRequired
+    }).isRequired
+  }).isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired
+};
 
 function Tables() {
   const [userRows, setUserRows] = useState([]);
@@ -24,6 +62,8 @@ function Tables() {
   const [searchTerm, setSearchTerm] = useState('');
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [newUser, setNewUser] = useState({
     nama_lengkap: '',
     alamat: '',
@@ -46,7 +86,7 @@ function Tables() {
           id: user.ID_PENGGUNA,
           author: user.NAMA_LENGKAP,
           alamat: user.ALAMAT,
-          telepon: user.TELEPON,
+          telepon: user.NOMOR_TELEPON,
           status: user.STATUS_AKTIF === "Aktif" ? "online" : "offline",
           employed: new Date(user.TANGGAL_PENDAFTARAN).toLocaleDateString(),
         }));
@@ -80,16 +120,7 @@ function Tables() {
       Header: "Actions",
       accessor: "actions",
       align: "center",
-      Cell: ({ cell }) => (
-        <div>
-          <Button onClick={() => handleClickOpenEdit(cell.row.original)} color="warning">
-            Edit
-          </Button>
-          <Button onClick={() => handleDelete(cell.row.original.id)} color="error">
-            Delete
-          </Button>
-        </div>
-      )
+      Cell: ActionsCell
     }
   ];
 
@@ -106,9 +137,7 @@ function Tables() {
     printWindow.print();
   };
 
-  const handleClickOpenAdd = () => {
-    setOpenAddDialog(true);
-  };
+  const handleClickOpenAdd = () => setOpenAddDialog(true);
 
   const handleClickOpenEdit = (user) => {
     setEditUser({
@@ -120,34 +149,24 @@ function Tables() {
     setOpenEditDialog(true);
   };
 
-  const handleCloseAdd = () => {
-    setOpenAddDialog(false);
+  const handleOpenConfirmDialog = (id) => {
+    setSelectedUserId(id);
+    setOpenConfirmDialog(true);
   };
 
-  const handleCloseEdit = () => {
-    setOpenEditDialog(false);
-  };
+  const handleCloseAdd = () => setOpenAddDialog(false);
+
+  const handleCloseEdit = () => setOpenEditDialog(false);
+
+  const handleCloseConfirmDialog = () => setOpenConfirmDialog(false);
 
   const handleSubmitAdd = async (values) => {
-    console.log('Submitting:', values); // Log the values
     try {
       await axios.post('http://localhost:5000/api/users/addUser', values);
       handleCloseAdd();
       await refreshData();
     } catch (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('Error request:', error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', error.message);
-      }
+      console.error('Error adding user:', error);
     }
   };
 
@@ -157,16 +176,19 @@ function Tables() {
       handleCloseEdit();
       await refreshData();
     } catch (error) {
-      console.error("There was a problem with the submit operation:", error);
+      console.error("Error updating user:", error);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/users/deleteUser/${id}`);
-      await refreshData();
+      if (selectedUserId) {
+        await axios.delete(`http://localhost:5000/api/users/deleteUser/${selectedUserId}`);
+        await refreshData();
+        setOpenConfirmDialog(false);
+      }
     } catch (error) {
-      console.error("There was a problem with the delete operation:", error);
+      console.error("Error deleting user:", error);
     }
   };
 
@@ -178,14 +200,14 @@ function Tables() {
         id: user.ID_PENGGUNA,
         author: user.NAMA_LENGKAP,
         alamat: user.ALAMAT,
-        telepon: user.TELEPON,
+        telepon: user.NOMOR_TELEPON,
         status: user.STATUS_AKTIF === "Aktif" ? "online" : "offline",
         employed: new Date(user.TANGGAL_PENDAFTARAN).toLocaleDateString(),
       }));
       setUserRows(formattedRows);
       setFilteredRows(formattedRows);
     } catch (error) {
-      console.error("There was a problem with the refresh operation:", error);
+      console.error("Error refreshing data:", error);
     }
   };
 
@@ -218,12 +240,14 @@ function Tables() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ flex: 1, marginRight: '1rem' }}
+                    aria-label="Search"
                   />
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={handlePrint}
                     style={{ color: 'white' }}
+                    aria-label="Print"
                   >
                     Print
                   </Button>
@@ -232,19 +256,23 @@ function Tables() {
                     color="success"
                     onClick={handleClickOpenAdd}
                     style={{ marginLeft: '1rem' }}
+                    aria-label="Add User"
                   >
                     Add User
                   </Button>
                 </div>
-              </MDBox>
-              <MDBox pt={3} id="printableTable">
-                <DataTable
-                  table={{ columns, rows: filteredRows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
+                <MDBox pt={3}>
+                  <div id="printableTable">
+                    <DataTable
+                      table={{ columns, rows: filteredRows }}
+                      isSorted={false}
+                      canSearch={false}
+                      entriesPerPage={false}
+                      showTotalEntries={false}
+                      noEndBorder
+                    />
+                  </div>
+                </MDBox>
               </MDBox>
             </Card>
           </Grid>
@@ -252,7 +280,7 @@ function Tables() {
       </MDBox>
       <Footer />
 
-      {/* Dialog for adding a new user */}
+      {/* Add User Dialog */}
       <Dialog open={openAddDialog} onClose={handleCloseAdd}>
         <DialogTitle>Add New User</DialogTitle>
         <DialogContent>
@@ -260,50 +288,48 @@ function Tables() {
             initialValues={newUser}
             onSubmit={handleSubmitAdd}
           >
-            {({ values, handleChange }) => (
-              <Form>
-                <TextField
-                  label="Full Name"
-                  name="nama_lengkap"
-                  variant="outlined"
-                  fullWidth
-                  value={values.nama_lengkap}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <TextField
-                  label="Address"
-                  name="alamat"
-                  variant="outlined"
-                  fullWidth
-                  value={values.alamat}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <TextField
-                  label="Phone"
-                  name="telepon"
-                  variant="outlined"
-                  fullWidth
-                  value={values.telepon}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <DialogActions>
-                  <Button onClick={handleCloseAdd} color="primary">
-                    Cancel
-                  </Button>
-                  <Button type="submit" color="primary">
-                    Add
-                  </Button>
-                </DialogActions>
-              </Form>
-            )}
+            <Form>
+              <Field
+                as={TextField}
+                name="nama_lengkap"
+                label="Full Name"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <Field
+                as={TextField}
+                name="alamat"
+                label="Address"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <Field
+                as={TextField}
+                name="telepon"
+                label="Phone"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <DialogActions>
+                <Button onClick={handleCloseAdd} color="primary">
+                  Cancel
+                </Button>
+                <Button type="submit" color="primary">
+                  Add
+                </Button>
+              </DialogActions>
+            </Form>
           </Formik>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for editing a user */}
+      {/* Edit User Dialog */}
       <Dialog open={openEditDialog} onClose={handleCloseEdit}>
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
@@ -311,47 +337,61 @@ function Tables() {
             initialValues={editUser}
             onSubmit={handleSubmitEdit}
           >
-            {({ values, handleChange }) => (
-              <Form>
-                <TextField
-                  label="Full Name"
-                  name="nama_lengkap"
-                  variant="outlined"
-                  fullWidth
-                  value={values.nama_lengkap}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <TextField
-                  label="Address"
-                  name="alamat"
-                  variant="outlined"
-                  fullWidth
-                  value={values.alamat}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <TextField
-                  label="Phone"
-                  name="telepon"
-                  variant="outlined"
-                  fullWidth
-                  value={values.telepon}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-                <DialogActions>
-                  <Button onClick={handleCloseEdit} color="primary">
-                    Cancel
-                  </Button>
-                  <Button type="submit" color="primary">
-                    Save
-                  </Button>
-                </DialogActions>
-              </Form>
-            )}
+            <Form>
+              <Field
+                as={TextField}
+                name="nama_lengkap"
+                label="Full Name"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <Field
+                as={TextField}
+                name="alamat"
+                label="Address"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <Field
+                as={TextField}
+                name="telepon"
+                label="Phone"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                required
+              />
+              <DialogActions>
+                <Button onClick={handleCloseEdit} color="primary">
+                  Cancel
+                </Button>
+                <Button type="submit" color="primary">
+                  Save
+                </Button>
+              </DialogActions>
+            </Form>
           </Formik>
         </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Dialog */}
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this user?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="primary">
+            Delete
+          </Button>
+        </DialogActions>
       </Dialog>
     </DashboardLayout>
   );
