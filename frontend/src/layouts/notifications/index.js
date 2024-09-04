@@ -1,191 +1,240 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import { useState } from "react";
-
-// @mui material components
+/* eslint-disable prettier/prettier */
+import React, { useEffect, useState } from 'react';
 import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
-import MDAlert from "components/MDAlert";
-import MDButton from "components/MDButton";
-import MDSnackbar from "components/MDSnackbar";
-
-// Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
+import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import MDButton from "components/MDButton";
+import axios from 'axios';
 
-function Notifications() {
-  const [successSB, setSuccessSB] = useState(false);
-  const [infoSB, setInfoSB] = useState(false);
-  const [warningSB, setWarningSB] = useState(false);
-  const [errorSB, setErrorSB] = useState(false);
+function Report() {
+  const [data, setData] = useState({
+    transactions: 0,
+    revenue: '0',
+    profit: '0',
+    productCount: 0,
+    userCount: 0,
+  });
 
-  const openSuccessSB = () => setSuccessSB(true);
-  const closeSuccessSB = () => setSuccessSB(false);
-  const openInfoSB = () => setInfoSB(true);
-  const closeInfoSB = () => setInfoSB(false);
-  const openWarningSB = () => setWarningSB(true);
-  const closeWarningSB = () => setWarningSB(false);
-  const openErrorSB = () => setErrorSB(true);
-  const closeErrorSB = () => setErrorSB(false);
+  const [employeeRevenue, setEmployeeRevenue] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
 
-  const alertContent = (name) => (
-    <MDTypography variant="body2" color="white">
-      A simple {name} alert with{" "}
-      <MDTypography component="a" href="#" variant="body2" fontWeight="medium" color="white">
-        an example link
-      </MDTypography>
-      . Give it a click if you like.
-    </MDTypography>
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/dashboard');
+        const { TRANSAKSI, PENDAPATAN, LABA, JUMLAH_PRODUK, JUMLAH_PENGGUNA } = response.data;
 
-  const renderSuccessSB = (
-    <MDSnackbar
-      color="success"
-      icon="check"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={successSB}
-      onClose={closeSuccessSB}
-      close={closeSuccessSB}
-      bgWhite
-    />
-  );
+        setData({
+          transactions: TRANSAKSI || 0,
+          revenue: formatCurrency(PENDAPATAN),
+          profit: formatCurrency(LABA),
+          productCount: JUMLAH_PRODUK || 0,
+          userCount: JUMLAH_PENGGUNA || 0,
+        });
 
-  const renderInfoSB = (
-    <MDSnackbar
-      icon="notifications"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={infoSB}
-      onClose={closeInfoSB}
-      close={closeInfoSB}
-    />
-  );
+        const employeeRevenueResponse = await axios.get('http://localhost:5000/api/employee-revenue');
+        setEmployeeRevenue(employeeRevenueResponse.data);
 
-  const renderWarningSB = (
-    <MDSnackbar
-      color="warning"
-      icon="star"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={warningSB}
-      onClose={closeWarningSB}
-      close={closeWarningSB}
-      bgWhite
-    />
-  );
+        const lowStockResponse = await axios.get('http://localhost:5000/api/low-stock-products');
+        setLowStockProducts(lowStockResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  const renderErrorSB = (
-    <MDSnackbar
-      color="error"
-      icon="warning"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={errorSB}
-      onClose={closeErrorSB}
-      close={closeErrorSB}
-      bgWhite
-    />
-  );
+    fetchData();
+  }, []);
+
+  function formatCurrency(value) {
+    return `Rp. ${Number(value).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
+  }
+
+  const handlePrint = (title) => {
+    window.print();
+  };
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox mt={6} mb={3}>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} lg={8}>
-            <Card>
-              <MDBox p={2}>
-                <MDTypography variant="h5">Alerts</MDTypography>
-              </MDBox>
-              <MDBox pt={2} px={2}>
-                <MDAlert color="primary" dismissible>
-                  {alertContent("primary")}
-                </MDAlert>
-                <MDAlert color="secondary" dismissible>
-                  {alertContent("secondary")}
-                </MDAlert>
-                <MDAlert color="success" dismissible>
-                  {alertContent("success")}
-                </MDAlert>
-                <MDAlert color="error" dismissible>
-                  {alertContent("error")}
-                </MDAlert>
-                <MDAlert color="warning" dismissible>
-                  {alertContent("warning")}
-                </MDAlert>
-                <MDAlert color="info" dismissible>
-                  {alertContent("info")}
-                </MDAlert>
-                <MDAlert color="light" dismissible>
-                  {alertContent("light")}
-                </MDAlert>
-                <MDAlert color="dark" dismissible>
-                  {alertContent("dark")}
-                </MDAlert>
-              </MDBox>
-            </Card>
+      <MDBox py={3}>
+        <Grid container spacing={3}>
+          {/* Statistics Cards */}
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="shopping_cart"
+                title="Transaksi"
+                count={data.transactions}
+                percentage={{ color: "success", amount: "", label: "Hari Ini" }}
+                action={
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={() => handlePrint("Transaksi")}
+                    fullWidth
+                    style={{ marginTop: "10px" }}
+                  >
+                    Print
+                  </MDButton>
+                }
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="attach_money"
+                title="Pendapatan"
+                count={data.revenue}
+                percentage={{ color: "success", amount: "", label: "Hari Ini" }}
+                action={
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={() => handlePrint("Pendapatan")}
+                    fullWidth
+                    style={{ marginTop: "10px" }}
+                  >
+                    Print
+                  </MDButton>
+                }
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="trending_up"
+                title="Laba"
+                count={data.profit}
+                percentage={{ color: "success", amount: "", label: "Hari Ini" }}
+                action={
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={() => handlePrint("Laba")}
+                    fullWidth
+                    style={{ marginTop: "10px" }}
+                  >
+                    Print
+                  </MDButton>
+                }
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="inventory_2"
+                title="Jumlah Produk"
+                count={data.productCount}
+                percentage={{ color: "success", amount: "", label: "Total Produk" }}
+                action={
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={() => handlePrint("Jumlah Produk")}
+                    fullWidth
+                    style={{ marginTop: "10px" }}
+                  >
+                    Print
+                  </MDButton>
+                }
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="people"
+                title="Jumlah Pengguna"
+                count={data.userCount}
+                percentage={{ color: "success", amount: "", label: "Total Pengguna" }}
+                action={
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={() => handlePrint("Jumlah Pengguna")}
+                    fullWidth
+                    style={{ marginTop: "10px" }}
+                  >
+                    Print
+                  </MDButton>
+                }
+              />
+            </MDBox>
           </Grid>
 
-          <Grid item xs={12} lg={8}>
-            <Card>
-              <MDBox p={2} lineHeight={0}>
-                <MDTypography variant="h5">Notifications</MDTypography>
-                <MDTypography variant="button" color="text" fontWeight="regular">
-                  Notifications on this page use Toasts from Bootstrap. Read more details here.
-                </MDTypography>
-              </MDBox>
-              <MDBox p={2}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="success" onClick={openSuccessSB} fullWidth>
-                      success notification
-                    </MDButton>
-                    {renderSuccessSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="info" onClick={openInfoSB} fullWidth>
-                      info notification
-                    </MDButton>
-                    {renderInfoSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="warning" onClick={openWarningSB} fullWidth>
-                      warning notification
-                    </MDButton>
-                    {renderWarningSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="error" onClick={openErrorSB} fullWidth>
-                      error notification
-                    </MDButton>
-                    {renderErrorSB}
-                  </Grid>
-                </Grid>
-              </MDBox>
-            </Card>
+          {/* Employee Revenue Report */}
+          <Grid item xs={12}>
+            <MDBox>
+              <h3>Laporan Pendapatan per Pegawai</h3>
+              <table style={{ width: '100%', textAlign: 'left', borderSpacing: '0 10px' }}>
+                <thead>
+                  <tr>
+                    <th>Nama Pegawai</th>
+                    <th>Pendapatan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employeeRevenue.map((employee, index) => (
+                    <tr key={index}>
+                      <td>{employee.name}</td>
+                      <td>{formatCurrency(employee.revenue)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <MDButton
+                variant="contained"
+                color="info"
+                onClick={() => handlePrint("Laporan Pendapatan per Pegawai")}
+                fullWidth
+                style={{ marginTop: "20px" }}
+              >
+                Print
+              </MDButton>
+            </MDBox>
+          </Grid>
+
+          {/* Low Stock Report */}
+          <Grid item xs={12}>
+            <MDBox>
+              <h3>Laporan Stok Produk Menipis</h3>
+              <table style={{ width: '100%', textAlign: 'left', borderSpacing: '0 10px' }}>
+                <thead>
+                  <tr>
+                    <th>Nama Produk</th>
+                    <th>Stok</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lowStockProducts.map((product, index) => (
+                    <tr key={index}>
+                      <td>{product.name}</td>
+                      <td>{product.stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <MDButton
+                variant="contained"
+                color="info"
+                onClick={() => handlePrint("Laporan Stok Produk Menipis")}
+                fullWidth
+                style={{ marginTop: "20px" }}
+              >
+                Print
+              </MDButton>
+            </MDBox>
           </Grid>
         </Grid>
       </MDBox>
@@ -194,4 +243,4 @@ function Notifications() {
   );
 }
 
-export default Notifications;
+export default Report;
