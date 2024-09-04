@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
 =========================================================
 * Material Dashboard 2 React - v2.2.0
@@ -52,6 +53,9 @@ import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "co
 // Images
 import brandWhite from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
+
+// Import sign-in page component
+import SignIn from "./layouts/authentication/sign-in"; // Adjust path as needed
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -146,6 +150,9 @@ export default function App() {
     </MDBox>
   );
 
+  // Check authentication status (this is a placeholder, adjust according to your auth logic)
+  const isAuthenticated = false; // Replace with actual authentication check
+
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
@@ -166,8 +173,10 @@ export default function App() {
         )}
         {layout === "vr" && <Configurator />}
         <Routes>
+          {!isAuthenticated && <Route path="/" element={<Navigate to="/sign-in" />} />}
+          <Route path="/sign-in" element={<SignIn />} />
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/sign-in" />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
@@ -190,8 +199,10 @@ export default function App() {
       )}
       {layout === "vr" && <Configurator />}
       <Routes>
+          {!isAuthenticated && <Route path="/" element={<Navigate to="/sign-in" />} />}
+          <Route path="/sign-in" element={<SignIn />} />
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/sign-in" />} />
       </Routes>
     </ThemeProvider>
   );
