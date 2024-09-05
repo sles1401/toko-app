@@ -55,7 +55,7 @@ ActionsCell.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired // Ensure onDelete is defined
 };
-s
+
 function Tables() {
   const [userRows, setUserRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);

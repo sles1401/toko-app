@@ -12,6 +12,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(helmet()); // Use helmet for security
 
 // Initialize database pool
 db.initialize().catch(err => {
@@ -28,6 +29,8 @@ const paymentRoutes = require('./routes/payment_method');
 const productReportRoutes = require('./routes/report');
 const employeeRevenueRoutes = require('./routes/employeeRevenue');
 const revenue = require('./routes/revenue');
+const profileRouter = require('./routes/profile');
+const logoutRoutes = require('./routes/logout'); // Import the logout route
 
 // const reportRoutes = require('./routes/report');
 
@@ -39,6 +42,8 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/reports', productReportRoutes);
 app.use('/api/employeerevenue', employeeRevenueRoutes);
 app.use('/api/revenue', revenue);
+app.use('/api/profile', profileRouter);
+app.use('/api/logout', logoutRoutes); // Use the logout route
 
 // app.use('/api/report', reportRoutes);
 
