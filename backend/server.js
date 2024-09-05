@@ -24,12 +24,15 @@ const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
+const paymentRoutes = require('./routes/payment_method');
+
 // const reportRoutes = require('./routes/report');
 
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes); // Prefix for user routes
 app.use('/api/products', productRoutes); // Prefix for product routes
 app.use('/api/auth', authRoutes);
+app.use('/api/payment', paymentRoutes)
 
 // app.use('/api/report', reportRoutes);
 

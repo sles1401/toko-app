@@ -106,7 +106,7 @@ function Cover() {
                 Sign In
               </MDButton>
             </MDBox>
-            <MDBox mt={3} mb={1} textAlign="center">
+            {/* <MDBox mt={3} mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
                 Dont have an account?{" "}
                 <MDTypography
@@ -120,7 +120,7 @@ function Cover() {
                   Sign Up
                 </MDTypography>
               </MDTypography>
-            </MDBox>
+            </MDBox> */}
           </MDBox>
         </MDBox>
       </Card>

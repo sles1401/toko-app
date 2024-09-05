@@ -49,7 +49,7 @@ function Report() {
   }, []);
 
   function formatCurrency(value) {
-    return `Rp. ${Number(value).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
+    return `${Number(value).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
   }
 
   const handlePrint = (title) => {
