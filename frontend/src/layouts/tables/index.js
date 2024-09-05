@@ -30,7 +30,7 @@ const ActionsCell = ({ cell, onEdit, onDelete }) => (
       Edit
     </Button>
     <Button
-      onClick={() => onDelete(cell.row.original.id)}
+      onClick={() => onDelete(cell.row.original.id)} // Ensure onDelete is defined
       color="error"
       aria-label="Delete"
     >
@@ -53,9 +53,9 @@ ActionsCell.propTypes = {
     }).isRequired
   }).isRequired,
   onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired
+  onDelete: PropTypes.func.isRequired // Ensure onDelete is defined
 };
-
+s
 function Tables() {
   const [userRows, setUserRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -270,7 +270,11 @@ function Tables() {
                       entriesPerPage={false}
                       showTotalEntries={false}
                       noEndBorder
+                      // Ensure you are passing onEdit and onDelete functions here
+                      onEdit={handleClickOpenEdit}
+                      onDelete={handleOpenConfirmDialog} // Make sure this function is defined and passed
                     />
+
                   </div>
                 </MDBox>
               </MDBox>

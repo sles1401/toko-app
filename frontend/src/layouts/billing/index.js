@@ -328,6 +328,7 @@ const Billing = () => {
             style={{ width: "100%" }}
           />
           <DataTable
+            onClick={handleSelectProduct}
             table={{
               columns: [
                 { Header: "Product Name", accessor: "NAMA_PRODUK" },
@@ -336,7 +337,10 @@ const Billing = () => {
               ],
               rows: filteredProducts,
             }}
-            onRowClick={handleSelectProduct}
+            onRowClick={(handleSelectProduct) => {
+              console.log("Baris yang diklik:", handleSelectProduct); // Debug: Periksa apakah event dipanggil
+              handleSelectProduct(handleSelectProduct);
+            }}
           />
         </DialogContent>
         <DialogActions>

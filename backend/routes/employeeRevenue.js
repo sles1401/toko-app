@@ -3,20 +3,21 @@ const router = express.Router();
 const db = require('../config/db'); // Adjust this path if needed
 
 // Define a route to get products
-router.get('/getPriceReport', async (req, res) => {
+router.get('/getEmployeeRevenue', async (req, res) => {
     try {
         const query = `
     SELECT
-      p.ID_Produk,
-      p.Nama_Produk,
-      p.Harga_Jual,
-      p.Harga_Modal,
-      s.Jumlah_Stok AS Quantity
-    FROM
-      Produk p
-      JOIN Stok s ON p.ID_Produk = s.ID_Produk
-    ORDER BY
-      p.Nama_Produk
+    p.ID_Pengguna,
+    pg.Nama_Lengkap,
+    SUM(p.Total_Harga) AS Total_Omzet
+FROM
+    Penjualan p
+    JOIN Pengguna pg ON p.ID_Pengguna = pg.ID_Pengguna
+GROUP BY
+    p.ID_Pengguna,
+    pg.Nama_Lengkap
+ORDER BY
+    Total_Omzet DESC
   `;
         const result = await db.executeQuery(query); // Ensure this method matches your database config
         res.json(result.rows); // Send the data as JSON
