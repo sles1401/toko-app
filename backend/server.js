@@ -30,6 +30,7 @@ const productReportRoutes = require('./routes/report');
 const employeeRevenueRoutes = require('./routes/employeeRevenue');
 const revenue = require('./routes/revenue');
 const profileRouter = require('./routes/profile');
+const transactionRoutes = require("./routes/transaction");
 const logoutRoutes = require('./routes/logout'); // Import the logout route
 
 // const reportRoutes = require('./routes/report');
@@ -43,6 +44,7 @@ app.use('/api/reports', productReportRoutes);
 app.use('/api/employeerevenue', employeeRevenueRoutes);
 app.use('/api/revenue', revenue);
 app.use('/api/profile', profileRouter);
+app.use("/api/transactions", transactionRoutes);
 app.use('/api/logout', logoutRoutes); // Use the logout route
 
 // app.use('/api/report', reportRoutes);

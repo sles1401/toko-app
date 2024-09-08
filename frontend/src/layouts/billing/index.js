@@ -10,11 +10,11 @@ import DataTable from "examples/Tables/DataTable";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Alert from "@mui/material/Alert";
 
 const Billing = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,6 +33,8 @@ const Billing = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openProductDialog, setOpenProductDialog] = useState(false);
   const [productSearchTerm, setProductSearchTerm] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [warning, setWarning] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,6 +109,13 @@ const Billing = () => {
 
   const handleAddToCart = async (event) => {
     event.preventDefault();
+
+    // Validasi
+    if (!transactionData.productName || !transactionData.quantity || !transactionData.price) {
+      setWarning("Please fill in all required fields.");
+      return;
+    }
+
     try {
       const subtotal = transactionData.quantity * transactionData.price;
       setTransactionData({
@@ -123,6 +132,8 @@ const Billing = () => {
         paymentMethod: "",
         subtotal: "",
       });
+
+      setWarning(""); // Clear warning message
 
       const response = await axios.get("/api/transactions"); // Update with correct endpoint
       setRows(response.data);
@@ -148,15 +159,24 @@ const Billing = () => {
     setOpenProductDialog(false);
   };
 
-  const handleSelectProduct = (row) => {
-    const product = row.original; // Access the original data of the row
+  const handleSelectProduct = (product) => {
     setTransactionData({
       ...transactionData,
-      productName: product.NAMA_PRODUK, // Update with the selected product's name
-      price: product.HARGA_JUAL, // Update with the selected product's price
-      quantity: product.JUMLAH_STOK, // Set default quantity or update as needed
+      productName: product.NAMA_PRODUK,
+      price: product.HARGA_JUAL,
     });
+    setSelectedProduct(product);
     handleCloseProductDialog(); // Close the dialog
+  };
+
+  const handleQuantityChange = (e) => {
+    const quantity = e.target.value;
+    const subtotal = quantity * transactionData.price;
+    setTransactionData({
+      ...transactionData,
+      quantity: quantity,
+      subtotal: subtotal.toFixed(2),
+    });
   };
 
   return (
@@ -181,11 +201,20 @@ const Billing = () => {
                 </MDTypography>
               </MDBox>
               <MDBox pt={3} px={2}>
+                {warning && <Alert severity="warning">{warning}</Alert>}
                 <form
                   onSubmit={handleAddToCart}
                   style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
                 >
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={handleOpenProductDialog}
+                      style={{ color: "white" }}
+                    >
+                      Select Product
+                    </Button>
                     <TextField
                       label="Product Name"
                       variant="outlined"
@@ -196,23 +225,13 @@ const Billing = () => {
                       style={{ width: "100%" }}
                       disabled
                     />
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={handleOpenProductDialog}
-                      style={{ color: "white" }}
-                    >
-                      Select Product
-                    </Button>
                   </div>
                   <TextField
                     label="Quantity"
                     variant="outlined"
                     type="number"
                     value={transactionData.quantity}
-                    onChange={(e) =>
-                      setTransactionData({ ...transactionData, quantity: e.target.value })
-                    }
+                    onChange={handleQuantityChange}
                   />
                   <TextField
                     label="Price"
@@ -229,9 +248,6 @@ const Billing = () => {
                     variant="outlined"
                     type="number"
                     value={transactionData.subtotal}
-                    onChange={(e) =>
-                      setTransactionData({ ...transactionData, subtotal: e.target.value })
-                    }
                     disabled
                   />
                   <Button
@@ -265,48 +281,15 @@ const Billing = () => {
               <MDBox pt={3} px={2}>
                 <DataTable
                   table={{
-                    columns: [
-                      { Header: "Product Name", accessor: "productName" },
-                      { Header: "Quantity", accessor: "quantity" },
-                      { Header: "Price", accessor: "price" },
-                      { Header: "Subtotal", accessor: "subtotal" },
-                    ],
+                    columns: columns,
                     rows: cart,
                   }}
                   canSearch
-                  search={searchTerm}
-                  onSearch={setSearchTerm}
                 />
-                <br />
-                <FormControl variant="outlined" style={{ width: "100%", height: "50px" }}>
-                  <InputLabel>Payment Method</InputLabel>
-                  <Select
-                    value={transactionData.paymentMethod}
-                    onChange={(e) =>
-                      setTransactionData({ ...transactionData, paymentMethod: e.target.value })
-                    }
-                    label="Payment Method"
-                  >
-                    {paymentMethods.map((method) => (
-                      <MenuItem key={method.id} value={method.id}>
-                        {method.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                >
-                  <MDTypography variant="h6">Total:</MDTypography>
-                  <MDTypography variant="h6" style={{ color: "grey" }}>
-                    Rp.{" "}
-                  </MDTypography>{" "}
-                  {/* Disabled subtotal text */}
-                </div>
                 <Button
-                  onClick={handleAddTransaction}
                   variant="contained"
-                  color="primary"
+                  color="success"
+                  onClick={handleAddTransaction}
                   style={{ marginTop: "1rem", color: "white" }}
                 >
                   Add Transaction
@@ -321,27 +304,43 @@ const Billing = () => {
         <DialogTitle>Select Product</DialogTitle>
         <DialogContent>
           <TextField
-            label="Search Products"
+            label="Search"
             variant="outlined"
             value={productSearchTerm}
             onChange={(e) => setProductSearchTerm(e.target.value)}
-            style={{ width: "100%" }}
+            fullWidth
+            margin="dense"
           />
-          <DataTable
-            onClick={handleSelectProduct}
-            table={{
-              columns: [
-                { Header: "Product Name", accessor: "NAMA_PRODUK" },
-                { Header: "Price", accessor: "HARGA_JUAL" },
-                { Header: "Stok", accessor: "JUMLAH_STOK" },
-              ],
-              rows: filteredProducts,
-            }}
-            onRowClick={(handleSelectProduct) => {
-              console.log("Baris yang diklik:", handleSelectProduct); // Debug: Periksa apakah event dipanggil
-              handleSelectProduct(handleSelectProduct);
-            }}
-          />
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            {filteredProducts.map((product) => (
+              <div
+                key={product.ID_PRODUK}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px",
+                  borderBottom: "1px solid #ccc",
+                }}
+              >
+                <div style={{ flexGrow: 1 }}>
+                  <div>
+                    <strong>{product.NAMA_PRODUK}</strong>
+                  </div>
+                  <div>Harga: Rp. {product.HARGA_JUAL}</div>
+                  <div>Stok: {product.JUMLAH_STOK}</div>
+                </div>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleSelectProduct(product)}
+                  style={{ color: "white" }}
+                >
+                  Select
+                </Button>
+              </div>
+            ))}
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseProductDialog} color="primary">

@@ -10,11 +10,24 @@ import DataTable from "examples/Tables/DataTable";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 
 function ProductTable() {
   const [productRows, setProductRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [editData, setEditData] = useState({
+    productName: "",
+    category: "",
+    unit: "",
+    stock: "",
+    price: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,10 +42,15 @@ function ProductTable() {
           stock: product.JUMLAH_STOK,
           price: product.HARGA_JUAL,
           edit: (
-            <Button variant="contained" color="secondary" style={{ color: "white" }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              style={{ color: "white" }}
+              onClick={() => handleEdit(product)}
+            >
               Edit
             </Button>
-          ), // Edit button
+          ),
         }));
 
         setProductRows(formattedRows);
@@ -54,15 +72,6 @@ function ProductTable() {
     setFilteredRows(results);
   }, [searchTerm, productRows]);
 
-  const columns = [
-    { Header: "Product Name", accessor: "productName", width: "20%", align: "left" },
-    { Header: "Category", accessor: "category", width: "20%", align: "left" },
-    { Header: "Unit", accessor: "unit", width: "15%", align: "left" },
-    { Header: "Stock", accessor: "stock", width: "15%", align: "center" },
-    { Header: "Price", accessor: "price", width: "15%", align: "right" },
-    { Header: "Edit", accessor: "edit", width: "15%", align: "center" }, // Edit column
-  ];
-
   const handlePrint = () => {
     const printWindow = window.open("", "", "height=600,width=800");
     const printContent = document.getElementById("printableTable").innerHTML;
@@ -77,6 +86,36 @@ function ProductTable() {
     printWindow.focus();
     printWindow.print();
   };
+
+  const handleEdit = (product) => {
+    setSelectedProduct(product);
+    setEditData({
+      productName: product.NAMA_PRODUK,
+      category: product.NAMA_KATEGORI,
+      unit: product.NAMA_SATUAN,
+      stock: product.JUMLAH_STOK,
+      price: product.HARGA_JUAL,
+    });
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSave = () => {
+    // Save logic goes here (call API to update product details)
+    setOpen(false);
+  };
+
+  const columns = [
+    { Header: "Product Name", accessor: "productName", width: "20%", align: "left" },
+    { Header: "Category", accessor: "category", width: "20%", align: "left" },
+    { Header: "Unit", accessor: "unit", width: "15%", align: "left" },
+    { Header: "Stock", accessor: "stock", width: "15%", align: "center" },
+    { Header: "Price", accessor: "price", width: "15%", align: "right" },
+    { Header: "Edit", accessor: "edit", width: "15%", align: "center" },
+  ];
 
   return (
     <DashboardLayout>
@@ -136,6 +175,56 @@ function ProductTable() {
         </Grid>
       </MDBox>
       <Footer />
+
+      {/* Popup Edit */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Edit Product</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Product Name"
+            fullWidth
+            value={editData.productName}
+            onChange={(e) => setEditData({ ...editData, productName: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Category"
+            fullWidth
+            value={editData.category}
+            onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Unit"
+            fullWidth
+            value={editData.unit}
+            onChange={(e) => setEditData({ ...editData, unit: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Stock"
+            fullWidth
+            value={editData.stock}
+            onChange={(e) => setEditData({ ...editData, stock: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Price"
+            fullWidth
+            value={editData.price}
+            onChange={(e) => setEditData({ ...editData, price: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardLayout>
   );
 }
