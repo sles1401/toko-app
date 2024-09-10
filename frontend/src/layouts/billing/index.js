@@ -39,7 +39,7 @@ const Billing = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("/api/transactions"); // Adjust the endpoint as necessary
+        const response = await axios.get("http://localhost:5000/api/transactions"); // Adjust the endpoint as necessary
         setColumns([
           { Header: "Transaction ID", accessor: "transactionId" },
           { Header: "Product Name", accessor: "productName" },

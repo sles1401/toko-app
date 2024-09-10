@@ -172,7 +172,7 @@ function Tables() {
 
   const handleSubmitEdit = async (values) => {
     try {
-      await axios.put(`http://localhost:5000/api/users/updateUser/${values.id}`, values);
+      await axios.put(`http://localhost:5000/api/users/editUser/${values.id}`, values);
       handleCloseEdit();
       await refreshData();
     } catch (error) {

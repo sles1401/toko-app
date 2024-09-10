@@ -103,9 +103,108 @@ function ProductTable() {
     setOpen(false);
   };
 
-  const handleSave = () => {
-    // Save logic goes here (call API to update product details)
-    setOpen(false);
+  const handleSave = async () => {
+    try {
+      const updatedProduct = {
+        NAMA_PRODUK: editData.productName,
+        NAMA_KATEGORI: editData.category,
+        NAMA_SATUAN: editData.unit,
+        JUMLAH_STOK: editData.stock,
+        HARGA_JUAL: editData.price,
+      };
+
+      // Perform validation
+      if (
+        !updatedProduct.NAMA_PRODUK ||
+        !updatedProduct.NAMA_KATEGORI ||
+        !updatedProduct.NAMA_SATUAN ||
+        updatedProduct.JUMLAH_STOK < 0 ||
+        updatedProduct.HARGA_JUAL <= 0
+      ) {
+        alert("Periksa kembali data Anda");
+        return;
+      }
+
+      // Fetch current product data
+      const response = await axios.get(
+        `http://localhost:5000/api/products/getProducts/${selectedProduct.ID_PRODUK}`
+      );
+      const currentProduct = response.data;
+
+      // Ensure currentProduct is valid
+      if (!currentProduct) {
+        alert("Produk tidak ditemukan");
+        return;
+      }
+
+      const isHargaBeliUpdated = updatedProduct.HARGA_JUAL !== currentProduct.HARGA_JUAL;
+      const isStokUpdated = updatedProduct.JUMLAH_STOK !== currentProduct.JUMLAH_STOK;
+
+      // Update product data if there are changes
+      if (isHargaBeliUpdated || isStokUpdated) {
+        await axios.put(
+          `http://localhost:5000/api/products/updateProduct/${selectedProduct.ID_PRODUK}`,
+          updatedProduct
+        );
+
+        if (isStokUpdated) {
+          const stockChange = updatedProduct.JUMLAH_STOK - currentProduct.JUMLAH_STOK;
+          await axios.post("http://localhost:5000/api/products/updateStock", {
+            ID_PRODUK: selectedProduct.ID_PRODUK,
+            JUMLAH_STOK: updatedProduct.JUMLAH_STOK,
+            STOCK_CHANGE: stockChange,
+          });
+        }
+
+        if (isHargaBeliUpdated) {
+          await axios.post("http://localhost:5000/api/products/updatePrice", {
+            ID_PRODUK: selectedProduct.ID_PRODUK,
+            HARGA_BELI: updatedProduct.HARGA_JUAL,
+          });
+        }
+
+        alert("Data produk berhasil diperbarui!");
+
+        // Refresh data
+        const fetchData = async () => {
+          try {
+            const response = await axios.get("http://localhost:5000/api/products/getProducts");
+            const data = response.data;
+
+            const formattedRows = data.map((product) => ({
+              productName: product.NAMA_PRODUK,
+              category: product.NAMA_KATEGORI,
+              unit: product.NAMA_SATUAN,
+              stock: product.JUMLAH_STOK,
+              price: product.HARGA_JUAL,
+              edit: (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  style={{ color: "white" }}
+                  onClick={() => handleEdit(product)}
+                >
+                  Edit
+                </Button>
+              ),
+            }));
+
+            setProductRows(formattedRows);
+            setFilteredRows(formattedRows);
+          } catch (error) {
+            console.error("There was a problem with the fetch operation:", error);
+          }
+        };
+
+        fetchData();
+        setOpen(false);
+      } else {
+        alert("Tidak ada perubahan pada harga atau stok.");
+      }
+    } catch (error) {
+      console.error("There was an error updating the product:", error);
+      alert("Terjadi kesalahan saat memperbarui produk.");
+    }
   };
 
   const columns = [

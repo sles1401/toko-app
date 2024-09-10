@@ -44,7 +44,7 @@ app.use('/api/reports', productReportRoutes);
 app.use('/api/employeerevenue', employeeRevenueRoutes);
 app.use('/api/revenue', revenue);
 app.use('/api/profile', profileRouter);
-app.use("/api/transactions", transactionRoutes);
+app.use('/api/transactions', transactionRoutes);
 app.use('/api/logout', logoutRoutes); // Use the logout route
 
 // app.use('/api/report', reportRoutes);

@@ -14,11 +14,10 @@ router.get('/getUsers', async (req, res) => {
     }
 });
 
-// Define a route to add a new user
 router.post('/addUser', async (req, res) => {
     const { nama_lengkap, alamat, telepon } = req.body;
+    console.log('Received user data:', req.body);  // Log data received
 
-    // Validate input
     if (!nama_lengkap || !alamat || !telepon) {
         return res.status(400).json({ error: 'All fields are required' });
     }
@@ -31,10 +30,11 @@ router.post('/addUser', async (req, res) => {
 
     try {
         await db.executeQuery(query, params);
-        res.status(201).send('User added successfully');
+        console.log('User added successfully');
+        res.status(201).json({ message: 'User added successfully' });
     } catch (err) {
         console.error('Error adding user:', err);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
